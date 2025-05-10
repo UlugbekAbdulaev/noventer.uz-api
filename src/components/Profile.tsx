@@ -27,8 +27,7 @@ function Profile() {
       .then((res) => {
         setUser(res.data);
         setLoading(false);
-        console.log(res);
-
+        
       })
       .catch((err) => {
         console.error(err);

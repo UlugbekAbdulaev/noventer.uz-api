@@ -17,7 +17,7 @@ function Navbar() {
 
       .then((res) => {
         setUser(res.data)
-        console.log(res.data);
+       
 
       })
       .catch((err) => {

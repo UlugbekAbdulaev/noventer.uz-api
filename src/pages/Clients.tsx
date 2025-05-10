@@ -14,12 +14,13 @@ interface Employee {
     updated_at: string
 }
 
+
+
 const EmployeesTable = () => {
     const [employees, setEmployees] = useState<Employee[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
-    
 
     const [formData, setFormData] = useState({
         name: '',
