@@ -190,16 +190,7 @@ const EmployeesTable = () => {
                         </table>
                     </div>
 
-                    <div className="flex justify-end mt-4 space-x-2">
-                        {[1, 2, '...', 9, 10].map((page, i) => (
-                            <button
-                                key={i}
-                                className={`px-3 py-1 border rounded ${page === 1 ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-                            >
-                                {page}
-                            </button>
-                        ))}
-                    </div>
+                    
                 </div>
 
                 {/* Modal */}
