@@ -1,5 +1,5 @@
 
-import { Home, Users, Building2, CalendarDays } from 'lucide-react';
+import { Home, Users, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -17,9 +17,7 @@ const Sidebar = () => {
                     <Link to="/clients" className="flex items-center gap-2 text-gray-700 hover:text-orange-600">
                         <Home size={20} /> Mijozlar
                     </Link>
-                    <Link to="#" className="flex items-center gap-2 text-gray-700 hover:text-orange-600">
-                        <Building2 size={20} /> Bo‘limlar
-                    </Link>
+                   
                     <Link to="/smena" className="flex items-center gap-2 text-gray-700 hover:text-orange-600">
                         <CalendarDays size={20} /> Smenalar
                     </Link>

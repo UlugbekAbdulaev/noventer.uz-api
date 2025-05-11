@@ -11,6 +11,7 @@ function Profile() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [company, setcompany] = useState<any>([])
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -27,13 +28,28 @@ function Profile() {
       .then((res) => {
         setUser(res.data);
         setLoading(false);
-        
+
       })
       .catch((err) => {
         console.error(err);
         setError("Foydalanuvchi ma'lumotlarini olishda xatolik yuz berdi.");
         setLoading(false);
       });
+
+
+    instance
+      .get("/company/get/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      .then((res) => {
+        setcompany(res.data);
+        setLoading(false);
+        console.log(company);
+
+      })
   }, []);
 
   if (loading) return <p>Yuklanmoqda...</p>;
@@ -69,10 +85,14 @@ function Profile() {
                 <p><strong>Ism:</strong> {user?.full_name}</p>
                 <p><strong>Role:</strong> {user?.role}</p>
                 <p><strong>Tug'ilgan sanasi:</strong> {user?.birth_date}</p>
-              </div>
-              <div>
                 <p><strong>Email:</strong> {user?.email}</p>
                 <p><strong>Gender:</strong> {user?.gender}</p>
+              </div>
+              <div>
+                <p><strong>Companya:</strong> {company?.name}</p>
+                <p><strong>Yaratilgan:</strong> {company?.created_at}</p>
+                <a href="http://api.noventer.uz/media/licenses/SMM_plan.pdf"><strong>Litsenziya:</strong>{company?.license_file}</a>
+                <p><strong>Stir:</strong> {company?.stir}</p>
               </div>
             </div>
 

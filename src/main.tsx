@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Clients from './pages/Clients'
 import Smena from './pages/Smena'
 
+
 createRoot(document.getElementById('root')!).render(
 
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/hodimlar' element={<EmployeesTable />} />
           <Route path='/clients' element={<Clients/>} />
           <Route path='/smena' element={<Smena/>} />
+          
           <Route
             path="employees"
             element={

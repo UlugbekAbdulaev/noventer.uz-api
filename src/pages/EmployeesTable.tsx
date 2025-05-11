@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import instance from '../lib/Axios'
-
 import Layout from '../components/Layout/Layout'
 
 
@@ -15,14 +14,14 @@ interface Employee {
     birth_date: string,
     salary_type: string
   },
-  "user_full_name": string,
-  "user_role": string,
-  "branch_name": string,
-  "position": string,
-  "salary": string,
-  "official_salary": string,
-  "start_time": string,
-  "end_time": string
+  user_full_name: string,
+  user_role: string,
+  branch_name: string,
+  position: string,
+  salary: number,
+  official_salary: number,
+  start_time: number,
+  end_time: number
 }
 export interface IBranch {
   additional_phone: string
@@ -88,7 +87,7 @@ const EmployeesTable = () => {
   }
 
   const employes_list = (branchId = selectedBranchId) => {
-    instance.get(`/employee/employees/branch/${branchId}/`)
+    instance.get(`/employee/employees/branch/${branchId}/?limit=1000'`)
       .then((res) => {
         const unique = new Map<number, Employee>()
 
@@ -117,12 +116,12 @@ const EmployeesTable = () => {
         ...formData.user,
         [e.target.name]: e.target.value,
       },
-      
+
     });
 
-    
+
   }
-  
+
   const handleSubmit = async () => {
     try {
       await instance.post('/employee/employees/', {
@@ -135,21 +134,29 @@ const EmployeesTable = () => {
           birth_date: formData.user.birth_date,
           salary_type: formData.user.salary_type
         },
-        branch_id: formData.branch_id,
-        department_id: formData.department_id,
-        shift_id: formData.shift_id,
+        branch_id: Number(formData.branch_id),
+        department_id: formData.department_id ? Number(formData.department_id) : null,
+        shift_id: formData.shift_id ? Number(formData.shift_id) : null,
         position: formData.position,
         salary: formData.salary,
-        official_salary: formData.official_salary
+        official_salary: formData.official_salary,
 
       })
 
       setIsModalOpen(false)
       setFormData({
         user: {
-          full_name: '', gender: '', phone_number: '', passport_number: "", jshshr: "", birth_date: "", salary_type: ""
-
-        }, branch_id: "", department_id: "", shift_id: "",
+          full_name: '', 
+          gender: '', 
+          phone_number: '', 
+          passport_number: "", 
+          jshshr: "", 
+          birth_date: "", 
+          salary_type: ""
+        }, 
+        branch_id: "", 
+        department_id: "", 
+        shift_id: "",
         position: "",
         salary: "",
         official_salary: ""
@@ -284,64 +291,64 @@ const EmployeesTable = () => {
                     />
                   </div>
                   <div>
-                  <input
-                  name="salary_type"
-                  value={formData.user.salary_type}
-                  onChange={handleChange}
-                  placeholder="Oylik"
-                  className="w-full border p-2 rounded"
-                />
+                    <input
+                      name="salary_type"
+                      value={formData.user.salary_type}
+                      onChange={handleChange}
+                      placeholder="Oylik"
+                      className="w-full border p-2 rounded"
+                    />
 
-                <select
-                  name="branch_id"
-                  value={formData.branch_id}
-                  onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
-                  className="w-full border p-2 rounded"
-                >
-                  <option value="">Filial tanlang</option>
-                  {branchess.map(branch => (
-                    <option key={branch.id} value={branch.id}>{branch.name}</option>
-                  ))}
-                </select>
-                <input
-                  name="Bo'lim"
-                  value={formData.department_id}
-                  onChange={handleChange}
-                  placeholder="department_id"
-                  className="w-full border p-2 rounded"
-                />
-                <input
-                  name="shift"
-                  value={formData.shift_id}
-                  onChange={handleChange}
-                  placeholder="shift_id"
-                  className="w-full border p-2 rounded"
-                />
-                <input
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                  placeholder="position"
-                  className="w-full border p-2 rounded"
-                />
-                <input
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  placeholder="salary"
-                  className="w-full border p-2 rounded"
-                />
-                <input
-                  name="offical_salary"
-                  value={formData.official_salary}
-                  onChange={handleChange}
-                  placeholder="official salary"
-                  className="w-full border p-2 rounded"
-                />
+                    <select
+                      name="branch_id"
+                      value={formData.branch_id}
+                      onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
+                      className="w-full border p-2 rounded"
+                    >
+                      <option value="">Filial tanlang</option>
+                      {branchess.map(branch => (
+                        <option key={branch.id} value={branch.id}>{branch.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      name="Bo'lim"
+                      value={formData.department_id}
+                      onChange={handleChange}
+                      placeholder="department_id"
+                      className="w-full border p-2 rounded"
+                    />
+                    <input
+                      name="shift"
+                      value={formData.shift_id}
+                      onChange={handleChange}
+                      placeholder="shift_id"
+                      className="w-full border p-2 rounded"
+                    />
+                    <input
+                      name="position"
+                      value={formData.position}
+                      onChange={handleChange}
+                      placeholder="position"
+                      className="w-full border p-2 rounded"
+                    />
+                    <input
+                      name="salary"
+                      value={formData.salary}
+                      onChange={handleChange}
+                      placeholder="salary"
+                      className="w-full border p-2 rounded"
+                    />
+                    <input
+                      name="offical_salary"
+                      value={formData.official_salary}
+                      onChange={handleChange}
+                      placeholder="official salary"
+                      className="w-full border p-2 rounded"
+                    />
                   </div>
                 </div>
 
-                
+
 
 
 
