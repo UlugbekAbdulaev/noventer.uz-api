@@ -43,23 +43,27 @@ const EmployeesTable = () => {
   const [branchess, setBranchess] = useState<IBranch[]>([])
   const [selectedBranchId, setSelectedBranchId] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
   const [formData, setFormData] = useState({
     user: {
-      full_name: '',
+      full_name: "",
       gender: "",
       phone_number: "",
       passport_number: "",
       jshshr: "",
       birth_date: "",
-      salary_type: ""
+      salary_type: "official",
     },
-    branch_id: "",
-    department_id: "",
-    shift_id: "",
-    position: "",
+    branch_id: 0,
+    department_id: 1,
+    shift_id: 0,
+    position: "employee",
     salary: "",
-    official_salary: ""
-  })
+    official_salary: "",
+  });
+
 
 
   ////////////
@@ -86,22 +90,18 @@ const EmployeesTable = () => {
       })
   }
 
-  const employes_list = (branchId = selectedBranchId) => {
-    instance.get(`/employee/employees/branch/${branchId}/?limit=1000'`)
+  const employes_list = (branchId = selectedBranchId, page = currentPage) => {
+    const offset = (page - 1) * itemsPerPage
+    instance.get(`/employee/employees/branch/${branchId}/?limit=${itemsPerPage}&offset=${offset}`)
       .then((res) => {
         const unique = new Map<number, Employee>()
-
         res?.data?.results?.forEach((item: any) => {
-
           if (!unique.has(item.id)) {
             unique.set(item.id, item)
           }
         })
-
         setEmployees(Array.from(unique.values()))
         setLoading(false)
-        console.log(employees);
-
       })
       .catch((err) => {
         console.error(err)
@@ -109,64 +109,75 @@ const EmployeesTable = () => {
         setLoading(false)
       })
   }
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      user: {
-        ...formData.user,
-        [e.target.name]: e.target.value,
-      },
 
-    });
+  const numericFields = ["branch_id", "department_id", "shift_id", "salary", "official_salary"];
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    const newValue = numericFields.includes(name) ? Number(value) : value;
 
-  }
-
-  const handleSubmit = async () => {
-    try {
-      await instance.post('/employee/employees/', {
+    if (name in formData.user) {
+      setFormData((prev) => ({
+        ...prev,
         user: {
-          full_name: formData.user.full_name,
-          gender: formData.user.gender,
-          phone_number: formData.user.phone_number,
-          passport_number: formData.user.passport_number,
-          jshshr: formData.user.jshshr,
-          birth_date: formData.user.birth_date,
-          salary_type: formData.user.salary_type
+          ...prev.user,
+          [name]: newValue,
         },
-        branch_id: Number(formData.branch_id),
-        department_id: formData.department_id ? Number(formData.department_id) : null,
-        shift_id: formData.shift_id ? Number(formData.shift_id) : null,
-        position: formData.position,
-        salary: formData.salary,
-        official_salary: formData.official_salary,
-
-      })
-
-      setIsModalOpen(false)
-      setFormData({
-        user: {
-          full_name: '', 
-          gender: '', 
-          phone_number: '', 
-          passport_number: "", 
-          jshshr: "", 
-          birth_date: "", 
-          salary_type: ""
-        }, 
-        branch_id: "", 
-        department_id: "", 
-        shift_id: "",
-        position: "",
-        salary: "",
-        official_salary: ""
-      })
-      employes_list()
-    } catch (err) {
-      console.error("Smena yaratishda xatolik:", err)
-      alert("Smena yaratishda xatolik yuz berdi")
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
     }
+
+  };
+
+
+
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    employes_list(selectedBranchId, page)
   }
+  useEffect(() => {
+    branch_list()
+  }, [])
+
+  useEffect(() => {
+    employes_list(selectedBranchId, currentPage)
+  }, [selectedBranchId, currentPage])
+
+
+  ////////////////////////
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem("accessToken");
+    console.log(formData);
+
+    try {
+      const response = await instance.post(
+        `/employee/employees/`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("Xodim yaratildi:", response.data);
+      setIsModalOpen(false);
+      
+    } catch (error: any) {
+      console.error("Smena yaratishda xatolik:", error);
+      if (error.response) {
+        console.log(error.response.data);
+      }
+    }
+  };
+
+
   useEffect(() => {
     branch_list(),
       employes_list()
@@ -243,7 +254,8 @@ const EmployeesTable = () => {
           {isModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-xl w-[400px] space-y-4">
-                <h2 className="text-lg font-semibold">Yangi Mijoz Qo'shish</h2>
+                <h2 className="text-lg font-semibold">Yangi Xodim Qo'shish</h2>
+
 
                 <div className='flex gap-3'>
                   <div>
@@ -252,42 +264,46 @@ const EmployeesTable = () => {
                       value={formData.user.full_name}
                       onChange={handleChange}
                       placeholder="Hodim ismi"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
-                    <input
+                    <select
                       name="gender"
                       value={formData.user.gender}
                       onChange={handleChange}
-                      placeholder="male/famale"
-                      className="w-full border p-2 rounded"
-                    />
+                      className="w-full border p-2 rounded mt-2"
+                    >
+                      <option value="">Jinsni tanlang</option>
+                      <option value="male">Erkak</option>
+                      <option value="female">Ayol</option>
+                    </select>
+
                     <input
                       name="phone_number"
                       value={formData.user.phone_number}
                       onChange={handleChange}
                       placeholder="Hodim tel:"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
                     <input
                       name="passport_number"
                       value={formData.user.passport_number}
                       onChange={handleChange}
                       placeholder="Hodim passporti"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
                     <input
                       name="jshshr"
                       value={formData.user.jshshr}
                       onChange={handleChange}
                       placeholder="Hodim JSHSHR"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
                     <input
+                      type="date"
                       name="birth_date"
                       value={formData.user.birth_date}
                       onChange={handleChange}
-                      placeholder="Tug'ilgan sana:"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
                   </div>
                   <div>
@@ -296,55 +312,33 @@ const EmployeesTable = () => {
                       value={formData.user.salary_type}
                       onChange={handleChange}
                       placeholder="Oylik"
-                      className="w-full border p-2 rounded"
+                      className="w-full border p-2 rounded mt-2"
                     />
 
                     <select
                       name="branch_id"
                       value={formData.branch_id}
-                      onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
-                      className="w-full border p-2 rounded"
+                      onChange={(e) =>
+                        setFormData({ ...formData, branch_id: parseInt(e.target.value) })
+                      }
+
+                      className="w-full border p-2 rounded mt-2"
                     >
                       <option value="">Filial tanlang</option>
                       {branchess.map(branch => (
                         <option key={branch.id} value={branch.id}>{branch.name}</option>
                       ))}
                     </select>
-                    <input
-                      name="Bo'lim"
-                      value={formData.department_id}
-                      onChange={handleChange}
-                      placeholder="department_id"
-                      className="w-full border p-2 rounded"
-                    />
-                    <input
-                      name="shift"
-                      value={formData.shift_id}
-                      onChange={handleChange}
-                      placeholder="shift_id"
-                      className="w-full border p-2 rounded"
-                    />
-                    <input
-                      name="position"
-                      value={formData.position}
-                      onChange={handleChange}
-                      placeholder="position"
-                      className="w-full border p-2 rounded"
-                    />
-                    <input
-                      name="salary"
-                      value={formData.salary}
-                      onChange={handleChange}
-                      placeholder="salary"
-                      className="w-full border p-2 rounded"
-                    />
-                    <input
-                      name="offical_salary"
-                      value={formData.official_salary}
-                      onChange={handleChange}
-                      placeholder="official salary"
-                      className="w-full border p-2 rounded"
-                    />
+                    <input className="w-full border p-2 rounded mt-2" name="department_id" value={formData.department_id} onChange={handleChange} placeholder="department_id" />
+
+                    <input className="w-full border p-2 rounded mt-2" name="shift_id" value={formData.shift_id} onChange={handleChange} placeholder="shift_id" />
+
+                    <input className="w-full border p-2 rounded mt-2" name="position" value={formData.position} onChange={handleChange} placeholder="position" />
+
+                    <input className="w-full border p-2 rounded mt-2" name="salary" value={formData.salary} onChange={handleChange} placeholder="salary" />
+
+                    <input className="w-full border p-2 rounded mt-2" name="official_salary" value={formData.official_salary} onChange={handleChange} placeholder="official salary" />
+
                   </div>
                 </div>
 
@@ -365,22 +359,26 @@ const EmployeesTable = () => {
                   >
                     Qo'shish
                   </button>
+
                 </div>
               </div>
             </div>
           )}
 
+          
+
           <div className="flex justify-end mt-4 space-x-2">
-            {[1, 2, '...', 9, 10].map((page, i) => (
+            {Array.from({ length: 10 }).map((_, i) => (
               <button
                 key={i}
-                className={`px-3 py-1 border rounded ${page === 1 ? 'bg-blue-500 text-white' : 'text-gray-700'
-                  }`}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-1 border rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
               >
-                {page}
+                {i + 1}
               </button>
             ))}
           </div>
+
         </div>
 
 
@@ -391,3 +389,7 @@ const EmployeesTable = () => {
 }
 
 export default EmployeesTable
+
+
+
+

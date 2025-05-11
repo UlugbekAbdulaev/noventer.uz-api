@@ -3,6 +3,7 @@ import instance from "../../lib/Axios"
 
 
 
+
 function Navbar() {
   const [user, setUser] = useState<any>(null);
   useEffect(() => {
@@ -34,11 +35,13 @@ function Navbar() {
           <img src="/logo/Union.png" alt="" />
           <h1 className="font-bold text-3xl pt-2 pl-3">Noventer</h1>
         </div>
+        
+
         <div className="pr-10 pt-5 flex">
-          <div className="w-[40px] h-[40px] ">
-          <img src={user?.avatar} alt="avatar" className="w-8 h-8 rounded-full" />
+          <div className="w-[60px] h-[60px] ">
+          <img src="/prof.jpg" alt="avatar" className="w-12 h-12 rounded-full" />
           </div>
-          <p>{user?.full_name}</p>
+          <p className="pt-2"><b>{user?.full_name}</b></p>
         </div>
       </div>
 
